@@ -29,6 +29,9 @@ public class MainApp {
         if (args.equals("-fdfichero")){
             modelo = new Modelo(FactoriaFuenteDatos.FICHERO);
         }
+        if (args.equals("-fdmysql")){
+            modelo = new Modelo(FactoriaFuenteDatos.MYSQL);
+        }
         return modelo;
     }
     private static Vista procesarArgumentosVista(String args){
