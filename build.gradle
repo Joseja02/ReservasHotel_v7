@@ -37,6 +37,9 @@ sourceCompatibility = '17'
 targetCompatibility = '17'
 
 dependencies {
+    // MySQL Driver
+    implementation 'mysql:mysql-connector-java:8.0.33'
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     testImplementation platform('org.junit:junit-bom:5.9.1')
@@ -44,7 +47,7 @@ dependencies {
     testImplementation 'org.junit.platform:junit-platform-suite-engine:1.9.1'
     // Entrada para que el repositorio jitpack.io sepa acceder a la localización de librería entrada
     implementation 'com.github.JRJimenezReyes:entrada:1.0.3'
-    // MogoDB Driver
+    // MongoDB Driver
     implementation 'org.mongodb:mongodb-driver-sync:4.4.2'
 }
 
