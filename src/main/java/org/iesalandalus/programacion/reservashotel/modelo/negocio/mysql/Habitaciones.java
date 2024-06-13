@@ -88,16 +88,16 @@ public class Habitaciones implements IHabitaciones {
         String query = null;
 
         if (habitacion instanceof Simple){
-            query = "INSERT INTO " + NOMBRE_TABLA + " (planta, puerta, precio) VALUES (?, ?, ?)";
+            query = "INSERT INTO " + NOMBRE_TABLA + " (identificador, planta, puerta, precio, numero_personas, tipo) VALUES (?, ?, ?, ?, ?, ?)";
         }
         if (habitacion instanceof Doble){
-            query = "INSERT INTO " + NOMBRE_TABLA + " (planta, puerta, precio, camas_individuales, camas_dobles) VALUES (?, ?, ?, ?, ?)";
+            query = "INSERT INTO " + NOMBRE_TABLA + " (identificador, planta, puerta, precio, numero_personas, tipo, camas_individuales, camas_dobles) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         }
         if (habitacion instanceof Triple){
-            query = "INSERT INTO " + NOMBRE_TABLA + " (planta, puerta, precio, banos, camas_individuales, camas_dobles) VALUES (?, ?, ?, ?, ?, ?)";
+            query = "INSERT INTO " + NOMBRE_TABLA + " (identificador, planta, puerta, precio, numero_personas, tipo, camas_individuales, camas_dobles, banos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         }
         if (habitacion instanceof Suite){
-            query = "INSERT INTO " + NOMBRE_TABLA + " (planta, puerta, precio, banos, jacuzzi) VALUES (?, ?, ?, ?, ?)";
+            query = "INSERT INTO " + NOMBRE_TABLA + " (identificador, planta, puerta, precio, numero_personas, tipo, banos, jacuzzi) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         }
 
         try {
@@ -152,6 +152,5 @@ public class Habitaciones implements IHabitaciones {
 
     public void terminar(){
         MySQL.cerrarConexion();
-        System.out.println("Conexión con MySQL cerrada con éxito.");
     }
 }

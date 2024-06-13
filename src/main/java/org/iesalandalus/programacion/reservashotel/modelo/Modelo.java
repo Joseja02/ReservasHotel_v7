@@ -32,6 +32,10 @@ public class Modelo implements IModelo {
             fuenteDatos = FactoriaFuenteDatos.FICHERO.crear();
             setFuenteDatos(fuenteDatos);
         }
+        if (factoriaFuenteDatos == FactoriaFuenteDatos.MYSQL){
+            fuenteDatos = FactoriaFuenteDatos.MYSQL.crear();
+            setFuenteDatos(fuenteDatos);
+        }
         comenzar();
     }
     public void comenzar() {

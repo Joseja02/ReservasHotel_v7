@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class MySQL {
-    public static final DateTimeFormatter FORMATO_DIA = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-    public static final DateTimeFormatter FORMATO_DIA_HORA = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm");
+    public static final DateTimeFormatter FORMATO_DIA = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter FORMATO_DIA_HORA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
     private static final String SERVIDOR = "localhost";
@@ -75,7 +75,7 @@ public class MySQL {
         }
 
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             conexion = DriverManager.getConnection(conexionString, USUARIO, CONTRASENA);
 
             System.out.println("Conexión a base de datos " + SERVIDOR + " ... OK");
@@ -101,8 +101,8 @@ public class MySQL {
 
     public static PreparedStatement getPreparedStatement(Connection conexion, String query, Huesped huesped) throws SQLException {
         PreparedStatement ps = conexion.prepareStatement(query);
-        ps.setString(1, huesped.getNombre());
-        ps.setString(2, huesped.getDni());
+        ps.setString(1, huesped.getDni());
+        ps.setString(2, huesped.getNombre());
         ps.setString(3, huesped.getTelefono());
         ps.setString(4, huesped.getCorreo());
         ps.setString(5, huesped.getFechaNacimiento().format(FORMATO_DIA));
@@ -110,8 +110,8 @@ public class MySQL {
     }
 
     public static Huesped getHuespedFromResultSet(ResultSet rs) throws SQLException {
-        String nombre = rs.getString(NOMBRE);
         String dni = rs.getString(DNI);
+        String nombre = rs.getString(NOMBRE);
         String telefono = rs.getString(TELEFONO);
         String correo = rs.getString(CORREO);
         LocalDate fechaNacimiento = LocalDate.parse(rs.getString(FECHA_NACIMIENTO), FORMATO_DIA);
@@ -125,6 +125,23 @@ public class MySQL {
         ps.setInt(3, habitacion.getPuerta());
         ps.setDouble(4, habitacion.getPrecio());
         ps.setInt(5, habitacion.getNumeroMaximoPersonas());
+
+        if (habitacion instanceof Simple) {
+            ps.setString(6, TipoHabitacion.SIMPLE.name());
+        } else if (habitacion instanceof Doble) {
+            ps.setString(6, TipoHabitacion.DOBLE.name());
+            ps.setInt(7, ((Doble) habitacion).getNumCamasIndividuales());
+            ps.setInt(8, ((Doble) habitacion).getNumCamasDobles());
+        } else if (habitacion instanceof Triple) {
+            ps.setString(6, TipoHabitacion.TRIPLE.name());
+            ps.setInt(7, ((Triple) habitacion).getNumCamasIndividuales());
+            ps.setInt(8, ((Triple) habitacion).getNumCamasDobles());
+            ps.setInt(9, ((Triple) habitacion).getNumBanos());
+        } else if (habitacion instanceof Suite) {
+            ps.setString(6, TipoHabitacion.SUITE.name());
+            ps.setInt(7, ((Suite) habitacion).getNumBanos());
+            ps.setBoolean(8, ((Suite) habitacion).isTieneJacuzzi());
+        }
         return ps;
     }
 
@@ -132,13 +149,13 @@ public class MySQL {
         String tipo = rs.getString(TIPO);
         Habitacion habitacion = null;
         if (tipo.equals(TIPO_SIMPLE)) {
-            habitacion = new Simple(rs.getInt("planta"), rs.getInt("puerta"), rs.getDouble("precio"));
+            habitacion = new Simple(rs.getInt(PLANTA), rs.getInt(PUERTA), rs.getDouble(PRECIO));
         } else if (tipo.equals(TIPO_DOBLE)) {
-            habitacion = new Doble(rs.getInt("planta"), rs.getInt("puerta"), rs.getDouble("precio"), rs.getInt("camas_individuales"), rs.getInt("camas_dobles"));
+            habitacion = new Doble(rs.getInt(PLANTA), rs.getInt(PUERTA), rs.getDouble(PRECIO), rs.getInt(CAMAS_INDIVIDUALES), rs.getInt(CAMAS_DOBLE));
         } else if (tipo.equals(TIPO_TRIPLE)) {
-            habitacion = new Triple(rs.getInt("planta"), rs.getInt("puerta"), rs.getDouble("precio"), rs.getInt("banos"), rs.getInt("camas_individuales"), rs.getInt("camas_dobles"));
+            habitacion = new Triple(rs.getInt(PLANTA), rs.getInt(PUERTA), rs.getDouble(PRECIO), rs.getInt(BANOS), rs.getInt(CAMAS_INDIVIDUALES), rs.getInt(CAMAS_DOBLE));
         } else if (tipo.equals(TIPO_SUITE)) {
-            habitacion = new Suite(rs.getInt("planta"), rs.getInt("puerta"), rs.getDouble("precio"), rs.getInt("banos"), rs.getBoolean("jacuzzi"));
+            habitacion = new Suite(rs.getInt(PLANTA), rs.getInt(PUERTA), rs.getDouble(PRECIO), rs.getInt(BANOS), rs.getBoolean(JACUZZI));
         }
         return habitacion;
     }
@@ -147,18 +164,19 @@ public class MySQL {
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setString(1, reserva.getHuesped().getDni());
         ps.setString(2, reserva.getHabitacion().getIdentificador());
-        ps.setString(3, reserva.getRegimen().toString());
+        ps.setString(3, reserva.getRegimen().name());
         ps.setString(4, reserva.getFechaInicioReserva().format(FORMATO_DIA));
         ps.setString(5, reserva.getFechaFinReserva().format(FORMATO_DIA));
+
         if (reserva.getCheckIn() != null) {
             ps.setString(6, reserva.getCheckIn().format(FORMATO_DIA_HORA));
         } else {
-            ps.setNull(6, java.sql.Types.TIMESTAMP);
+            ps.setNull(6, Types.VARCHAR);
         }
         if (reserva.getCheckOut() != null) {
             ps.setString(7, reserva.getCheckOut().format(FORMATO_DIA_HORA));
         } else {
-            ps.setNull(7, java.sql.Types.TIMESTAMP);
+            ps.setNull(7, Types.VARCHAR);
         }
         ps.setDouble(8, reserva.getPrecio());
         ps.setInt(9, reserva.getNumeroPersonas());
@@ -173,7 +191,8 @@ public class MySQL {
         LocalDate fechaFinReserva = LocalDate.parse(rs.getString("fecha_fin_reserva"), FORMATO_DIA);
         Reserva reserva = new Reserva(huesped, habitacion, regimen, fechaInicioReserva, fechaFinReserva, rs.getInt("numero_personas"));
         if (rs.getString("checkin") != null) {
-            reserva.setCheckIn(LocalDateTime.parse(rs.getString("checkin"), FORMATO_DIA_HORA));
+            LocalDateTime checkIn = LocalDateTime.parse(rs.getString("checkin"), FORMATO_DIA_HORA);
+            reserva.setCheckIn(checkIn);
         }
         if (rs.getString("checkout") != null) {
             reserva.setCheckOut(LocalDateTime.parse(rs.getString("checkout"), FORMATO_DIA_HORA));

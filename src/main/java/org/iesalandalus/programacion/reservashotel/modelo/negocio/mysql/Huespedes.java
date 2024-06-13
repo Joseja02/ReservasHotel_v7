@@ -63,7 +63,7 @@ public class Huespedes implements IHuespedes {
             PreparedStatement ps = MySQL.getPreparedStatement(conexion, query, huesped);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new OperationNotSupportedException("ERROR: No se pudo insertar el huésped.");
+            throw new OperationNotSupportedException(e.getMessage());
         }
     }
 
@@ -111,6 +111,5 @@ public class Huespedes implements IHuespedes {
 
     public void terminar(){
         MySQL.cerrarConexion();
-        System.out.println("Conexión con MySQL cerrada con éxito.");
     }
 }

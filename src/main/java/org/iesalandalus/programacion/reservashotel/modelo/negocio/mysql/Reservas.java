@@ -123,12 +123,12 @@ public class Reservas implements IReservas {
         }
 
         List<Reserva> reservasHuesped = new ArrayList<>();
-        String query = "SELECT * FROM " + NOMBRE_TABLA + "WHERE dni = ?";
+        String query = "SELECT * FROM " + NOMBRE_TABLA + " WHERE dni_huesped = ?";
 
         try {
             PreparedStatement ps = conexion.prepareStatement(query);
             ps.setString(1, huesped.getDni());
-            ResultSet rs = ps.executeQuery(query);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Reserva reserva = MySQL.getReservaFromResultSet(rs);
                 reservasHuesped.add(reserva);
@@ -173,7 +173,7 @@ public class Reservas implements IReservas {
         }
 
         List<Reserva> reservasHuesped = new ArrayList<>();
-        String query = "SELECT * FROM" + NOMBRE_TABLA + " r " +
+        String query = "SELECT * FROM " + NOMBRE_TABLA + " r " +
                 "JOIN habitacion h ON r.identificador_habitacion = h.identificador " +
                 "WHERE h.identificador = ?";
 
@@ -219,12 +219,13 @@ public class Reservas implements IReservas {
         }
 
         String query = "UPDATE " + NOMBRE_TABLA + " SET checkin = ? WHERE identificador_habitacion = ? AND fecha_inicio_reserva = ?";
-        reserva.setCheckOut(fecha);
+        reserva.setCheckIn(fecha);
         try {
             PreparedStatement ps = conexion.prepareStatement(query);
-            ps.setTimestamp(1, Timestamp.valueOf(reserva.getCheckIn()));
+            ps.setString(1, reserva.getCheckIn().format(MySQL.FORMATO_DIA_HORA));
             ps.setString(2, reserva.getHabitacion().getIdentificador());
             ps.setString(3, reserva.getFechaInicioReserva().toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -245,9 +246,10 @@ public class Reservas implements IReservas {
         reserva.setCheckOut(fecha);
         try {
             PreparedStatement ps = conexion.prepareStatement(query);
-            ps.setTimestamp(1, Timestamp.valueOf(reserva.getCheckOut()));
+            ps.setString(1, reserva.getCheckOut().format(MySQL.FORMATO_DIA_HORA));
             ps.setString(2, reserva.getHabitacion().getIdentificador());
             ps.setString(3, reserva.getFechaInicioReserva().toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -258,6 +260,5 @@ public class Reservas implements IReservas {
 
     public void terminar(){
         MySQL.cerrarConexion();
-        System.out.println("Conexión con MySQL cerrada con éxito.");
     }
 }
