@@ -1,8 +1,5 @@
 package org.iesalandalus.programacion.reservashotel.modelo.negocio.mysql.utilidades;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoDatabase;
-
 
 import org.iesalandalus.programacion.reservashotel.modelo.dominio.*;
 
@@ -29,13 +26,13 @@ public class MySQL {
     public static final String TELEFONO = "telefono";
     public static final String CORREO = "correo";
     public static final String FECHA_NACIMIENTO = "fecha_nacimiento";
-    public static final String HUESPED_DNI = HUESPED + "." + DNI;
+    public static final String DNI_HUESPED = DNI + "_" + HUESPED;
     public static final String HABITACION = "habitacion";
     public static final String IDENTIFICADOR = "identificador";
     public static final String PLANTA = "planta";
     public static final String PUERTA = "puerta";
     public static final String PRECIO = "precio";
-    public static final String HABITACION_IDENTIFICADOR = HABITACION + "." + IDENTIFICADOR;
+    public static final String IDENTIFICADOR_HABITACION = IDENTIFICADOR + "_" + HABITACION;
     public static final String TIPO = "tipo";
     public static final String HABITACION_TIPO = HABITACION + "." + TIPO;
     public static final String TIPO_SIMPLE = "SIMPLE";
@@ -184,18 +181,18 @@ public class MySQL {
     }
 
     public static Reserva getReservaFromResultSet(ResultSet rs) throws SQLException {
-        Huesped huesped = leerHuesped(rs.getString("dni_huesped"));
-        Habitacion habitacion = leerHabitacion(rs.getString("identificador_habitacion"));
-        Regimen regimen = Regimen.valueOf(rs.getString("regimen"));
-        LocalDate fechaInicioReserva = LocalDate.parse(rs.getString("fecha_inicio_reserva"), FORMATO_DIA);
-        LocalDate fechaFinReserva = LocalDate.parse(rs.getString("fecha_fin_reserva"), FORMATO_DIA);
-        Reserva reserva = new Reserva(huesped, habitacion, regimen, fechaInicioReserva, fechaFinReserva, rs.getInt("numero_personas"));
-        if (rs.getString("checkin") != null) {
-            LocalDateTime checkIn = LocalDateTime.parse(rs.getString("checkin"), FORMATO_DIA_HORA);
+        Huesped huesped = leerHuesped(rs.getString(DNI_HUESPED));
+        Habitacion habitacion = leerHabitacion(rs.getString(IDENTIFICADOR_HABITACION));
+        Regimen regimen = Regimen.valueOf(rs.getString(REGIMEN));
+        LocalDate fechaInicioReserva = LocalDate.parse(rs.getString(FECHA_INICIO_RESERVA), FORMATO_DIA);
+        LocalDate fechaFinReserva = LocalDate.parse(rs.getString(FECHA_FIN_RESERVA), FORMATO_DIA);
+        Reserva reserva = new Reserva(huesped, habitacion, regimen, fechaInicioReserva, fechaFinReserva, rs.getInt(NUMERO_PERSONAS));
+        if (rs.getString(CHECKIN) != null) {
+            LocalDateTime checkIn = LocalDateTime.parse(rs.getString(CHECKIN), FORMATO_DIA_HORA);
             reserva.setCheckIn(checkIn);
         }
-        if (rs.getString("checkout") != null) {
-            reserva.setCheckOut(LocalDateTime.parse(rs.getString("checkout"), FORMATO_DIA_HORA));
+        if (rs.getString(CHECKOUT) != null) {
+            reserva.setCheckOut(LocalDateTime.parse(rs.getString(CHECKOUT), FORMATO_DIA_HORA));
         }
         return reserva;
     }
